@@ -1,8 +1,0 @@
-prefix=/home/mj/catkin_ws/install
-
-Name: nextage_fillie_open_ros_bridge
-Description: Description of nextage_fillie_open_ros_bridge
-Version: 1.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: hironx_ros_bridge nextage_fillie_open_description

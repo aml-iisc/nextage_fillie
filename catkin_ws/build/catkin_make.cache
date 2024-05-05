@@ -1,2 +1,0 @@
-hii:nextage_fillie_open_description:nextage_fillie_open_gazebo:nextage_fillie_open_moveit_config:nextage_fillie_open_ros_bridge:rtmros_nextage_fillie_open
--DCATKIN_DEVEL_PREFIX=/home/mj/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/mj/catkin_ws/install -G Unix Makefiles

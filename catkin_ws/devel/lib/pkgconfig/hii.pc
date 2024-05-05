@@ -1,8 +1,0 @@
-prefix=/home/mj/catkin_ws/devel
-
-Name: hii
-Description: Description of hii
-Version: 0.0.0
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 
