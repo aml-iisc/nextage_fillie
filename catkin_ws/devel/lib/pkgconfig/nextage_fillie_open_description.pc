@@ -1,0 +1,8 @@
+prefix=/home/mj/catkin_ws/devel
+
+Name: nextage_fillie_open_description
+Description: Description of nextage_fillie_open_description
+Version: 1.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 
