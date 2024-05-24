@@ -132,9 +132,25 @@
         name="stereo_image_proc" args="_approximate_sync:=True" />
 
   <!-- this is not confirmed -->
+  <node pkg="tf" type="static_transform_publisher" name="waist_to_right_shoulder"
+    args="0 -0.18 0.61 0 0 0 /CHEST_LINK0 /RS 100" />
+  <node pkg="tf" type="static_transform_publisher" name="waist_to_left_shoulder"
+    args="0  0.18 0.61 0 0 0 /CHEST_LINK0 /LS 100" />		
+  <node pkg="tf" type="static_transform_publisher" name="besides_waist_below_right_shoulder"
+    args="0 -0.18 0 0 0 0 /CHEST_LINK0 /BRS 100" />
+  <node pkg="tf" type="static_transform_publisher" name="besides_waist_below_left_shoulder"
+    args="0 0.18 0 0 0 0 /CHEST_LINK0 /BLS 100" />
+  <node pkg="tf" type="static_transform_publisher" name="head_link_to_head_joint_link"
+    args="0 0 0 0 0 0 /HEAD_LINK1 /HEAD_JOINT1_Link 100" />
   <node pkg="tf" type="static_transform_publisher" name="head_link_to_stereo_link"
     args="0.07 0.06 0.09 0 0.3 0 /HEAD_JOINT1_Link /stereo_link 100" />
   <node pkg="tf" type="static_transform_publisher" name="stereo_link_to_stereo_frame"
     args="0 0 0 1.57 3.14 1.57 /stereo_link /stereo_frame 100" />
+  <node pkg="tf" type="static_transform_publisher" name="frame_to_camera"
+    args="0 0 0 0 0 0 /stereo_frame /camera 100" />
+
+<!-- rosrun tf static_transform_publisher 0 0 0 0 0 0 stereo_frame camera 50
+rosrun tf static_transform_publisher 0 0 0 0 0 0 HEAD_LINK1 HEAD_JOINT1_Link 50 -->
+
 
 </launch>

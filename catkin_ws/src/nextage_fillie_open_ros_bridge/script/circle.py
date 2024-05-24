@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import math
 
-def circle_eef(radius=0.1, eef='larm', step_degree=5, ccw=True, duration=0.1):
+def circle_eef(radius=0.01, eef='larm', step_degree=5, ccw=True, duration=0.1):
     '''
     Moves the designated eef point-by-point so that the trajectory as a whole draws a circle.
 
@@ -42,10 +42,15 @@ def circle_eef(radius=0.1, eef='larm', step_degree=5, ccw=True, duration=0.1):
         print('#{}th theta={} x={} y={} X0={} Y0={}'.format(i, theta, x, y, X0, Y0))
         robot.setTargetPose(eef, eef_pos, eef_rpy, duration)
         robot.waitInterpolation()
+        # robot.waitInterpolation()
         i += 1
+    
+    robot.goInitial(4)
+
 
 
 
 
 if __name__ == '__main__':
-    circle_eef()
+    while 1:
+        circle_eef(0.05,'larm',duration=0.08)
