@@ -88,6 +88,7 @@ if __name__ == '__main__':
 
     try:
         ros = ROS_Client()
+        robot.goInitial()
     except ROSInitException as e:
         print('[nextage_fillie_open.py] {}'.format(e))
     except socket.error as e: 

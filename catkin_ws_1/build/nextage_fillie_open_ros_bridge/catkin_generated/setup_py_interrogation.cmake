@@ -1,0 +1,7 @@
+set(nextage_fillie_open_ros_bridge_SETUP_PY_SETUP_MODULE "distutils.core")
+set(nextage_fillie_open_ros_bridge_SETUP_PY_VERSION "1.0.0")
+set(nextage_fillie_open_ros_bridge_SETUP_PY_SCRIPTS "")
+set(nextage_fillie_open_ros_bridge_SETUP_PY_PACKAGES "nextage_fillie_open_ros_bridge")
+set(nextage_fillie_open_ros_bridge_SETUP_PY_PACKAGE_DIRS "src/nextage_fillie_open_ros_bridge")
+set(nextage_fillie_open_ros_bridge_SETUP_PY_MODULES "")
+set(nextage_fillie_open_ros_bridge_SETUP_PY_MODULE_DIRS "")

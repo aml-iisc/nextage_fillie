@@ -133,13 +133,13 @@
 
   <!-- this is not confirmed -->
   <node pkg="tf" type="static_transform_publisher" name="waist_to_right_shoulder"
-    args="0 -0.18 0.61 0 0 0 /CHEST_LINK0 /RS 100" />
+    args="0 -0.15 0.55 0 0 0 /CHEST_LINK0 /RS 100" />
   <node pkg="tf" type="static_transform_publisher" name="waist_to_left_shoulder"
-    args="0  0.18 0.61 0 0 0 /CHEST_LINK0 /LS 100" />		
+    args="0  0.15 0.55 0 0 0 /CHEST_LINK0 /LS 100" />		
   <node pkg="tf" type="static_transform_publisher" name="besides_waist_below_right_shoulder"
-    args="0 -0.18 0 0 0 0 /CHEST_LINK0 /BRS 100" />
+    args="0 -0.15 0 0 0 0 /CHEST_LINK0 /BRS 100" />
   <node pkg="tf" type="static_transform_publisher" name="besides_waist_below_left_shoulder"
-    args="0 0.18 0 0 0 0 /CHEST_LINK0 /BLS 100" />
+    args="0 0.15 0 0 0 0 /CHEST_LINK0 /BLS 100" />
   <node pkg="tf" type="static_transform_publisher" name="head_link_to_head_joint_link"
     args="0 0 0 0 0 0 /HEAD_LINK1 /HEAD_JOINT1_Link 100" />
   <node pkg="tf" type="static_transform_publisher" name="head_link_to_stereo_link"

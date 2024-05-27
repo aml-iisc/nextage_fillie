@@ -157,7 +157,7 @@ def main(args):
         conv.messages = []
         command_file_path = "../send/do_segment.txt"
         prompt_file_path = "../send/this_is_the_prompt.txt"
-        image_path = "../send/please_segment.png"
+        image_path = "../send/please_segment_me.png"
         prompt=""
         # print(os.path.exists(command_file_path))
         if (os.path.exists(command_file_path) and os.path.exists(prompt_file_path) and os.path.exists(image_path)):
