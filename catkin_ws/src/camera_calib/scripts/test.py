@@ -77,11 +77,13 @@ while not rospy.is_shutdown():
     # print("hii")
     # print(np.shape(left_image),np.shape(right_image))
 
-    if(np.shape(left_image) == np.shape(right_image)):
+    if(np.shape(left_image) == np.shape(right_image) and np.shape(left_image)==(1096,1936,3) and np.shape(right_image)==(1096,1936,3)):
 
         # print(width)
+        # print(left_image.shape,right_image.shape)
         imSL = cv2.resize(left_image, (width, 480))
         imSR = cv2.resize(right_image, (width, 480))
+        # print(imSL.shape,imSR.shape)
         numpy_horizontal = np.hstack((imSL, imSR))
         # cv2.imshow('Img R',right_image)
         # cv2.imshow('Img L',left_image)

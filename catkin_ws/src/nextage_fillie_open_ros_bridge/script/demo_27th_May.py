@@ -20,6 +20,9 @@ import struct
 import ros_numpy
 import math
 import signal
+import pyaudio
+import wave
+from pydub import AudioSegment
 
 
 
@@ -28,43 +31,77 @@ errormsg_noros = 'No ROS Master found. Without it, you cannot use ROS from' \
                  ' to run rosbridge. How to do so? --> http://wiki.ros.org/rtmros_nextage/Tutorials/Operating%20Hiro%2C%20NEXTAGE%20OPEN'
 
 #default
+def shutup(sig,frame):
+    robot.servoOff()
+    sys.exit(0)
 
 
 def point_cloud_callack(point_cloud_msg):
     global point_cloud_data
     try:
+        # print(point_cloud_msg.fields)
         point_cloud_data = np.frombuffer(point_cloud_msg.data, dtype=np.uint8)
     except:
         print("Point cloud is not proper")
 
 def image_callback_left(img_msg):
     global left_image
+    # print("hii")
     # Try to convert the ROS Image message to a CV2 Image
     try:
         left_image = bridge.imgmsg_to_cv2(img_msg, "bgr8")
     except CvBridgeError, e:
         rospy.logerr("CvBridge Error: {0}".format(e))
 
-def object_centre_point(segmented_image,raw_point_cloud_matrix):
+def object_centre_point(segmented_image,raw_point_cloud_matrix,raw_image):
     x=0
     y=0
     z=0
     count=0
     camera_ps = geometry_msgs.msg.PointStamped()
     camera_ps.header.frame_id = 'camera'
-    for i in range(1096):
-        for j in range(1936):
-            # print(segmented_image[i][j])
-            # math.isnan(x)
-            if segmented_image[i][j]>0 and (not math.isnan(raw_point_cloud_matrix[i][j][0])) and (not math.isnan(raw_point_cloud_matrix[i][j][1])) and (not math.isnan(raw_point_cloud_matrix[i][j][2])):
-                x = x + raw_point_cloud_matrix[i][j][0]
-                y = y + raw_point_cloud_matrix[i][j][1]
-                z = z + raw_point_cloud_matrix[i][j][2]
-                count = count+1
-    camera_ps.point.x = x/count
-    camera_ps.point.y = y/count
-    camera_ps.point.z = z/count
+    # print(segmented_image.shape)
+    mask = segmented_image.astype(bool)
+    # print(raw_point_cloud_matrix.shape)
+    # print(raw_image.shape)
+    segmented_point_cloud = raw_point_cloud_matrix[mask]
+    segmented_image_rgb = raw_image[mask]
+    # print(segmented_point_cloud.shape)
+    # print(segmented_image_rgb.shape)
+    np.save(seg_pc_path,segmented_point_cloud)
+    np.save(seg_rgb_path,segmented_image_rgb)
+    temp_file = open(final_send_grasp_command_file_path,"w")
+    temp_file.close()
+    # scp_transfer(seg_pc_path, remote_directory, remote_host, remote_port, username, key_file)
+    # scp_transfer(seg_rgb_path, remote_directory, remote_host, remote_port, username, key_file)
+    # scp_transfer(final_send_grasp_command_file_path, remote_directory, remote_host, remote_port, username, key_file)
+    print("files are saved")
+    [x_mean,y_mean,z_mean]= np.nanmean(segmented_point_cloud, axis=0);
+    print(x_mean,y_mean,z_mean)  
+    # for i in range(1096):
+    #     for j in range(1936):
+    #         # print(segmented_image[i][j])
+    #         # math.isnan(x)
+    #         if segmented_image[i][j]>0 and (not math.isnan(raw_point_cloud_matrix[i][j][0])) and (not math.isnan(raw_point_cloud_matrix[i][j][1])) and (not math.isnan(raw_point_cloud_matrix[i][j][2])):
+    #             x = x + raw_point_cloud_matrix[i][j][0]
+    #             y = y + raw_point_cloud_matrix[i][j][1]
+    #             z = z + raw_point_cloud_matrix[i][j][2]
+    #             count = count+1
+    # if count == 0:
+    #     print("Point cloud can not be processed for the given segment")
+    #     return False
+    if x_mean == 0 and y==0 and z_mean==0:
+        print("Point cloud can not be processed for the given segment")
+        return False
+        
+    # camera_ps.point.x = x/count
+    # camera_ps.point.y = y/count
+    # camera_ps.point.z = z/count
 
+    camera_ps.point.x = x_mean
+    camera_ps.point.y = y_mean
+    camera_ps.point.z = z_mean
+    print(camera_ps)
     return camera_ps
 
 def look_at_this_point(camera_point,transform_listener):
@@ -88,7 +125,7 @@ def look_at_this_point(camera_point,transform_listener):
         rate.sleep()
         return False,0,0,0,0
 
-def move_the_robot(start_point,direction,moving_arm,moving_joint,fining=0.01,duration=0.1):
+def move_the_robot(start_point,direction,moving_arm,moving_joint,fining=0.005,duration=0.2):
     joint_pos = robot.getCurrentPosition(moving_joint)
     joint_rpy = robot.getCurrentRPY(moving_joint)
     in_duration = 2
@@ -114,6 +151,7 @@ def save_image_and_prompt(prompt):
     temp_file = open(final_send_command_file_path,"w")
     temp_file.close()
     print("files are saved")
+    return left_image
 
 def wait_and_return_segmented_image():
     while not (os.path.exists(segmented_image_path) and os.path.exists(final_receive_command_file_path)):
@@ -132,18 +170,22 @@ def wait_and_return_segmented_image():
 
 def evaluate_point_cloud():
     global point_cloud_data
+    print(point_cloud_data.shape)
     local_point_cloud = point_cloud_data.reshape((1096,1936,32))
     local_point_cloud = local_point_cloud.view(np.float32)
+    print("local point cloud",local_point_cloud.shape)
     # print(data_array.shape)
     x = local_point_cloud[:, :, 0]
     y = local_point_cloud[:, :, 1]
     z = local_point_cloud[:, :, 2]
+    # rgb = local_point_cloud[:,:,5]
+    # print("rgb",rgb.shape)
     # extra_floats1 = data_array[:, :, 3*float_size:].astype(dtype=np.float32).reshape((image_height, image_width, 8 - 3))
     final_matrix = np.stack((x, y, z), axis=-1)
+    print(type(final_matrix))
+    print(final_matrix.shape)
     # print(final_matrix.shape)
     return final_matrix
-
-
 
 
 def constant_prompt_and_point():
@@ -151,19 +193,24 @@ def constant_prompt_and_point():
     while not rospy.is_shutdown():
         try:
             prompt = raw_input("Tell me what to point at: ")
+            # prompt = "something to cut the cake"
         except KeyboardInterrupt:
             sys.exit(0)
-        save_image_and_prompt(prompt)
+        saved_image=save_image_and_prompt(prompt)
         raw_point_cloud_matrix = evaluate_point_cloud()
         segmented_image = wait_and_return_segmented_image()
-        camera_point = object_centre_point(segmented_image,raw_point_cloud_matrix)
+        camera_point = object_centre_point(segmented_image,raw_point_cloud_matrix,saved_image)
+        if not camera_point:
+            continue
         tf_success,start_point,direction,moving_arm,moving_joint = look_at_this_point(camera_point,transform_listener)
         if tf_success:
             confirmation = raw_input("Please type YES to move the robot(Caution: Robot will move!!!!): ")
+            # confirmation = 'YES'
             yes = 'YES'
             if confirmation == yes:
-                move_the_robot(start_point,direction,moving_arm,moving_joint)
-                time.sleep(3)
+            # if True:
+                move_the_robot(start_point,direction,moving_arm,moving_joint,fining=0.005,duration=0.05)
+                time.sleep(1)
                 goInit(robot,4)
             else:
                 print("Not moving the robot, Okay!!!")
@@ -221,7 +268,7 @@ if __name__ == '__main__':
 
         image_sub = rospy.Subscriber("/left/image_rect_color", Image, image_callback_left)
         pointcloud_sub = rospy.Subscriber("/points2", PointCloud2, point_cloud_callack)
-
+        # robot.servoOn()
         constant_prompt_and_point()
         # rospy.init_node("tf_trying")
         # robot.goInitial()

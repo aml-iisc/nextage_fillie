@@ -24,9 +24,9 @@ ratio = float(1936.0)/1096.0
 width = int(480*ratio)
 
 def shutup(sig,frames):
-    cv2.destroyAllWindows()
-    robot.goInitial()
-    robot.servoOff()
+    # cv2.destroyAllWindows()
+    # robot.goInitial()
+    # robot.servoOff()
     # cv2.destroyAllWindows()
     sys.exit(0)
     # exit(0)
@@ -40,14 +40,14 @@ def image_callback_left(img_msg):
     try:
         rect_left_image = bridge.imgmsg_to_cv2(img_msg, "bgr8")
         rect_left_image_resized = cv2.resize(rect_left_image, (width, 480))
-        cv2.startWindowThread()
-        cv2.namedWindow('Live Image')
-        cv2.imshow('Live Image',rect_left_image_resized)
+        # cv2.startWindowThread()
+        # cv2.namedWindow('Live Image HEAD')
+        # cv2.imshow('Live Image HEAD',rect_left_image_resized)
     except CvBridgeError, e:
         rospy.logerr("CvBridge Error: {0}".format(e))
 
 def head_controller(robot,fining=0.05):
-    robot.servoOn()
+    # robot.servoOn()
     pos = robot.getCurrentPosition("HEAD_JOINT1")
     rpy = robot.getCurrentRPY("HEAD_JOINT1")
     print(pos,rpy)
@@ -116,7 +116,7 @@ if __name__ == '__main__':
         # # rospy.init_node('prompt_and_point', anonymous=True)
         # rospy.loginfo("Hello ROS! Welcome to prompt and point!!")
         # if args.show_image:
-        image_sub = rospy.Subscriber("/left/image_rect_color", Image, image_callback_left)
+        # image_sub = rospy.Subscriber("/left/image_rect_color", Image, image_callback_left)
         # pointcloud_sub = rospy.Subscriber("/points2", PointCloud2, point_cloud_callack)
         head_controller(robot)
         # rospy.init_node("tf_trying")

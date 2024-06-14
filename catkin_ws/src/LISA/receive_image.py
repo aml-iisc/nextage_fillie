@@ -15,6 +15,11 @@ from model.segment_anything.utils.transforms import ResizeLongestSide
 from utils.utils import (DEFAULT_IM_END_TOKEN, DEFAULT_IM_START_TOKEN,
                          DEFAULT_IMAGE_TOKEN, IMAGE_TOKEN_INDEX)
 
+import pyaudio
+import wave
+from pydub import AudioSegment
+import whisper
+
 
 def parse_args(args):
     parser = argparse.ArgumentParser(description="LISA chat")
@@ -44,6 +49,46 @@ def parse_args(args):
         choices=["llava_v1", "llava_llama_2"],
     )
     return parser.parse_args(args)
+
+def record_audio(filename, duration, sample_rate=44100, channels=2):
+    p = pyaudio.PyAudio()
+
+    # Open stream
+    x = input("Press any key to start recording...Note: 5 Seconds are given.")
+    print("Recording...")
+    stream = p.open(format=pyaudio.paInt16,
+                    channels=channels,
+                    rate=sample_rate,
+                    input=True,
+                    frames_per_buffer=1024)
+    
+
+    frames = []
+
+    for _ in range(0, int(sample_rate / 1024 * duration)):
+        data = stream.read(1024,exception_on_overflow = False)
+        frames.append(data)
+
+    print("Finished recording.")
+
+    # Stop and close the stream 
+    stream.stop_stream()
+    stream.close()
+    p.terminate()
+
+    # Save the recorded data as a WAV file
+    wf = wave.open(filename + ".wav", 'wb')
+    wf.setnchannels(channels)
+    wf.setsampwidth(p.get_sample_size(pyaudio.paInt16))
+    wf.setframerate(sample_rate)
+    wf.writeframes(b''.join(frames))
+    wf.close()
+
+    # Convert WAV to MP3
+    audio = AudioSegment.from_wav(filename + ".wav")
+    # audio.export("/tmp/.X11-unix/audio.mp3", format="mp3")
+    audio.export("audio.mp3", format="mp3")
+    print("Saved " + filename +".mp3")
 
 
 def preprocess(
@@ -164,7 +209,13 @@ def main(args):
             file1 = open(prompt_file_path, 'r')
             Lines = file1.readlines()
             for line in Lines:
-                prompt = prompt + line.strip() 
+                prompt = prompt + line.strip()
+
+            record_audio("output", duration=5) 
+            whisper_model = whisper.load_model("base")
+            whisper_result = whisper_model.transcribe("audio.mp3") 
+            prompt = whisper_result["text"]
+            print(prompt)
         # prompt = input("Please input your prompt: ")
             prompt = DEFAULT_IMAGE_TOKEN + "\n" + prompt
             if args.use_mm_start_end:
@@ -229,11 +280,12 @@ def main(args):
                 tokenizer=tokenizer,
             )
             output_ids = output_ids[0][output_ids[0] != IMAGE_TOKEN_INDEX]
-
+            # print(output_ids)
             text_output = tokenizer.decode(output_ids, skip_special_tokens=False)
             text_output = text_output.replace("\n", "").replace("  ", " ")
             # print("text_output: ", text_output)
 
+            print(len(pred_masks))
             for i, pred_mask in enumerate(pred_masks):
                 if pred_mask.shape[0] == 0:
                     continue
@@ -262,6 +314,7 @@ def main(args):
             os.remove(command_file_path)
             os.remove(prompt_file_path)
             os.remove(image_path)
+            os.remove("audio.mp3")
 
 
 if __name__ == "__main__":

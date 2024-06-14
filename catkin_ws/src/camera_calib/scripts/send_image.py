@@ -246,6 +246,7 @@ while not rospy.is_shutdown():
         os.remove(command_file_path)
         os.remove(segmented_image_path)
         # num += 1
+    #"/home/mj/catkin_ws/src/camera_calib/scripts/send_image.py"
     # print("hii")
     # print(np.shape(left_image),np.shape(right_image))
         # print(width)

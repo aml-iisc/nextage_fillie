@@ -26,7 +26,7 @@ width = int(480*ratio)
 def shutup(sig,frames):
     cv2.destroyAllWindows()
     robot.goInitial()
-    robot.servoOff()
+    # robot.servoOff()
     # cv2.destroyAllWindows()
     sys.exit(0)
     # exit(0)
@@ -47,7 +47,7 @@ def image_callback_left(img_msg):
         rospy.logerr("CvBridge Error: {0}".format(e))
 
 def torso_controller(robot,fining=0.05):
-    robot.servoOn()
+    # robot.servoOn()
     pos = robot.getCurrentPosition("CHEST_JOINT0")
     rpy = robot.getCurrentRPY("CHEST_JOINT0")
     print(pos,rpy)
